@@ -20,7 +20,7 @@ const ZOHO_REFRESH_TOKEN = process.env.ZOHO_REFRESH_TOKEN;
 const ZOHO_TOKEN_URL = process.env.ZOHO_TOKEN_URL;
 
 // Route 1: Check if the server is running
-app.get('/ping', (req, res) => {
+app.get('/', (req, res) => {
   console.log('Ping route accessed.');
   res.send('Server is running!');
 });
