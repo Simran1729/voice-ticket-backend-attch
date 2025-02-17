@@ -163,6 +163,27 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
       // Extract form data
       const { subject, departmentId, description, severity, additionalNotes, contactId,ticketCreator, team,projectName,projectCode} = req.body;
 
+      const teamMap = {
+        "481842000003280197": "Planning Team",
+        "481842000003280141": "Production Team 1",
+        "481842000003280155": "Production Team 2",
+        "481842000003280169": "Production Team 3",
+        "481842000003280183": "Service Team",
+        "481842000003280001": "ALUSS",
+        "481842000003280015": "Composite",
+        "481842000003280029": "Interior Engineering",
+        "481842000003280043": "Yacht Design",
+        "481842000003280057": "Interior Design",
+        "481842000003280071": "Yacht Design 3D Visuals",
+        "481842000003280085": "Deck outfitting",
+        "481842000003280099": "Electrical",
+        "481842000003280113": "Integrated Solutions",
+        "481842000003280127": "Machinery and Piping"
+    };
+
+    // Map team ID to team name
+    const teamName = teamMap[team] || "Unknown Team";
+
 
       // Step 1: Create ticket in Zoho Desk
       const accessToken = await fetchAccessToken(); // Replace with your token
@@ -195,7 +216,7 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
               cf_severitypercentage: "0.0",
               cf_modelname: "F3 2017",
               cf_ticket_creator : ticketCreator,
-              cf_team_assigned : team,
+              cf_team_assigned : teamName,
               cf_project_name : projectName,
               cf_project_code : projectCode
           },
