@@ -61,28 +61,60 @@ app.post('/process-text', async (req, res) => {
       {
         model: 'gpt-4o',
         messages: [{ role: 'user', 
-            content: `Extract the following details from the provided text and return them in a key value format and don't have any additional signs or next line characters.Make sure that the names of keys are the following only:
+            content: `Extract the following details from the provided text and return them in a key-value format without any additional signs, symbols, or newline characters. Ensure that the extracted department and team match the predefined valid list below and return their respective IDs instead of names.
+
+                      ### **Valid Departments and Their Corresponding Team IDs:**
+
+                      Planning Department -> 481842000003244029
+                        - Planning Team -> 481842000003280197
+
+                      Production Department -> 481842000003250467
+                        - Production Team 1 -> 481842000003280141
+                        - Production Team 2 -> 481842000003280155
+                        - Production Team 3 -> 481842000003280169
+
+                      Service Department -> 481842000003257905
+                        - Service Team -> 481842000003280183
+
+                      Engineering Department -> 481842000003265343
+                        - ALUSS -> 481842000003280001
+                        - Composite -> 481842000003280015
+                        - Interior Engineering -> 481842000003280029
+                        - Yacht Design -> 481842000003280043
+                        - Interior Design -> 481842000003280057
+                        - Yacht Design 3D Visuals -> 481842000003280071
+                        - Deck Outfitting -> 481842000003280085
+                        - Electrical -> 481842000003280099
+                        - Integrated Solutions -> 481842000003280113
+                        - Machinery and Piping -> 481842000003280127
+
+                      Ensure that the selected **team corresponds to the department**. If a mismatch is found, correct it based on the best available match.
+
+                      ### **Extract the following details:**
                       1. Project_name
-                      2. Department
-                      3. Description
-                      4. Severity
-                      5. Due_Date (if mentioned)
-                      6. Additional_Notes (if any)
+                      2. Project_id
+                      3. Department (Return the ID of the matched department)
+                      4. Team_name (Return the ID of the matched team)
+                      5. Description
+                      6. Severity
+                      7. Subject (A concise summary of the issue, generated dynamically)
 
-                      Example Input:
-                      "This is for project HCL Tech, department marketing. The task is to create a social media campaign plan for our new yacht launch. The priority is high, and it needs to be completed by next Friday. Additional note: coordinate with the graphic design team for visuals."
+                      ### **Example Input:**
+                      "This is for project SY-127 Software Development, department is Engineering, team is Interior Engineering. The task is to create a different design blueprint for our new yacht launch. The priority is high, and it needs to be completed by next Friday."
 
-                      Example Output:
+                      ### **Example Output:**
                       {
-                        "Project_name": "HCL Tech",
-                        "Department": "Marketing",
-                        "Description": "Create a social media campaign plan for our new yacht launch.",
+                        "Project_name": "Software Development",
+                        "Project_id": "SY-127",
+                        "Department": "481842000003265343",
+                        "Team_name": "481842000003280029",
+                        "Description": "The task is to create a different design blueprint for our new yacht launch. The priority is high, and it needs to be completed by next Friday.",
                         "Severity": "High",
-                        "Due_Date": "Next Friday",
-                        "Additional_Notes": "Coordinate with the graphic design team for visuals."
+                        "Subject": "Blueprint design required for new yacht launch."
                       }
 
-                      Input: ${text}`
+                      Input: ${text}
+`
            }],
       },
       {
@@ -129,7 +161,7 @@ const upload = multer({storage : multer.memoryStorage()});
 app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
   try {
       // Extract form data
-      const { subject, departmentId, description, severity, additionalNotes, contactId } = req.body;
+      const { subject, departmentId, description, severity, additionalNotes, contactId,ticketCreator} = req.body;
 
 
       // Step 1: Create ticket in Zoho Desk
@@ -140,16 +172,18 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
         })
       }
 
+      console.log("generated token : ", accessToken);
+
         // ✅ Correcting the ticketData format
         const ticketData = {
           subject: subject,
-          departmentId: "722569000000006907", // Zoho department ID (keep this same)
-          description: `${description}\n\nAdditional Notes: ${additionalNotes}`, // Merging description & notes
+          departmentId: departmentId, // Zoho department ID (keep this same)
+          description: `${description}`, // Merging description & notes
           language: "English",
           priority: severity, // Maps severity to priority
           status: "Open", // Setting initial status
           category: "general", // Adjust category if needed
-          contactId: "722569000000722001", // Set correct contact ID
+          contactId: "481842000003206001", // Set correct contact ID
           productId: "", // Can be updated if needed
           cf: { // ✅ Add custom fields (cf)
               cf_permanentaddress: null,
@@ -159,7 +193,8 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
               cf_url: null,
               cf_secondaryemail: null,
               cf_severitypercentage: "0.0",
-              cf_modelname: "F3 2017"
+              cf_modelname: "F3 2017",
+              cf_ticket_creator : ticketCreator
           },
       };
 
@@ -184,31 +219,6 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
       console.log("Ticket ID:", ticketId);
       console.log("Ticket Number:", ticketNumber);
 
-
-      // // Step 2: Upload attachments directly from memory
-      // if (req.files && req.files.length > 0) {
-      //     for (const file of req.files) {
-      //         const formData = new FormData();
-      //         formData.append("file", file.buffer, { filename: file.originalname });
-
-      //         const accessToken1 = await fetchAccessToken();
-
-      //         await axios.post(
-      //             `https://desk.zoho.com/api/v1/tickets/${ticketId}/attachments`,
-      //             formData,
-      //             {
-      //                 headers: {
-      //                     "Authorization": `Zoho-oauthtoken ${accessToken1}`,
-      //                     orgId: ZOHO_ORG_ID,
-      //                     ...formData.getHeaders(),
-      //                 },
-      //             }
-      //         );
-
-      //         console.log(`Uploaded: ${file.originalname}`);
-      //     }
-      // }
-
         // ✅ Step 1: Log access token before uploading
         console.log("🔑 Using Access Token for Upload:", accessToken);
 
@@ -217,28 +227,6 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
         if (!ZOHO_ORG_ID) {
             throw new Error("❌ orgId is missing. Please check your .env file.");
         }
-
-        // ✅ Step 3: Upload files correctly
-        // if (req.files && req.files.length > 0) {
-        //     for (const file of req.files) {
-        //         const formData = new FormData();
-        //         formData.append("file", file.buffer, file.originalname); // ✅ Correct FormData format
-
-        //         await axios.post(
-        //             `https://desk.zoho.com/api/v1/tickets/${ticketId}/attachments`,
-        //             formData,
-        //             {
-        //                 headers: {
-        //                     "Authorization": `Zoho-oauthtoken ${accessToken}`, // ✅ Use same token
-        //                     "orgId": ZOHO_ORG_ID, 
-        //                     ...formData.getHeaders(),
-        //                 },
-        //             }
-        //         );
-
-        //         console.log(`✅ Uploaded: ${file.originalname}`);
-        //     }
-        // }
 
       if (!req.files || req.files.length === 0) {
           console.log("⚠️ No files uploaded.");
@@ -276,6 +264,8 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
 });
 
 
-app.listen(PORT, () => {  
-  console.log(`Server is running on port ${PORT}`);
-});
+module.exports = app;
+
+// app.listen(PORT, () => {  
+//   console.log(`Server is running on port ${PORT}`);
+// });
