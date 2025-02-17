@@ -161,7 +161,7 @@ const upload = multer({storage : multer.memoryStorage()});
 app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
   try {
       // Extract form data
-      const { subject, departmentId, description, severity, additionalNotes, contactId,ticketCreator} = req.body;
+      const { subject, departmentId, description, severity, additionalNotes, contactId,ticketCreator, team,projectName} = req.body;
 
 
       // Step 1: Create ticket in Zoho Desk
@@ -194,7 +194,9 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
               cf_secondaryemail: null,
               cf_severitypercentage: "0.0",
               cf_modelname: "F3 2017",
-              cf_ticket_creator : ticketCreator
+              cf_ticket_creator : ticketCreator,
+              cf_team_assigned : team,
+              cf_project_name : projectName
           },
       };
 
