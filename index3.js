@@ -182,7 +182,11 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
     };
 
     // Map team ID to team name
-    const teamName = teamMap[team] || "Unknown Team";
+    const teamIdMap = Object.fromEntries(
+      Object.entries(teamMap).map(([id, name]) => [name, id])
+  );
+
+  const teamId = teamIdMap[team] || "";
 
 
       // Step 1: Create ticket in Zoho Desk
@@ -205,7 +209,8 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
           status: "Open", // Setting initial status
           category: "general", // Adjust category if needed
           contactId: "481842000003206001", // Set correct contact ID
-          productId: "", // Can be updated if needed
+          productId: "", // Can be updated if needed,
+          assigneeId : teamId,
           cf: { // ✅ Add custom fields (cf)
               cf_permanentaddress: null,
               cf_dateofpurchase: null,
