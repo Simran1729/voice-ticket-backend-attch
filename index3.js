@@ -210,7 +210,6 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
           category: "general", // Adjust category if needed
           contactId: "481842000003206001", // Set correct contact ID
           productId: "", // Can be updated if needed,
-          assigneeId : teamId,
           cf: { // ✅ Add custom fields (cf)
               cf_permanentaddress: null,
               cf_dateofpurchase: null,
