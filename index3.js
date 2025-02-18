@@ -216,7 +216,7 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
               cf_severitypercentage: "0.0",
               cf_modelname: "F3 2017",
               cf_ticket_creator : ticketCreator,
-              cf_team_assigned : teamName,
+              cf_team_assigned : team,
               cf_project_name : projectName,
               cf_project_code : projectCode
           },
