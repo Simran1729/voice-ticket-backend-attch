@@ -206,7 +206,6 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
           departmentId: departmentId, // Zoho department ID (keep this same)
           description: `${description}`, // Merging description & notes
           language: "English",
-          priority: severity, // Maps severity to priority
           status: "Open", // Setting initial status
           category: "general", // Adjust category if needed
           contactId: "481842000003357001", // Set correct contact ID
@@ -222,6 +221,7 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
               cf_severitypercentage: "0.0",
               cf_modelname: "F3 2017",
               cf_project_code : projectCode,
+              cf_severity : severity
           },
       };
 
@@ -291,8 +291,8 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
 });
 
 
-module.exports = app;
+// module.exports = app;
 
-// app.listen(PORT, () => {  
-//   console.log(`Server is running on port ${PORT}`);
-// });
+app.listen(PORT, () => {  
+  console.log(`Server is running on port ${PORT}`);
+});
