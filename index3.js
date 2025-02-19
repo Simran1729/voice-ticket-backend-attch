@@ -161,7 +161,7 @@ const upload = multer({storage : multer.memoryStorage()});
 app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
   try {
       // Extract form data
-      const { subject, departmentId, description, severity, additionalNotes, contactId,ticketCreator, team,projectName,projectCode} = req.body;
+      const { subject, departmentId, description, severity, contactId,ticketCreator, team,projectCode} = req.body;
 
       const teamMap = {
         "481842000003280197": "Planning Team",
@@ -197,7 +197,8 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
         })
       }
 
-      console.log("generated token : ", accessToken);
+      // console.log("generated token : ", accessToken);
+      // console.log("Team id : ", teamId);
 
         // ✅ Correcting the ticketData format
         const ticketData = {
@@ -208,8 +209,9 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
           priority: severity, // Maps severity to priority
           status: "Open", // Setting initial status
           category: "general", // Adjust category if needed
-          contactId: "481842000003206001", // Set correct contact ID
+          contactId: "481842000003357001", // Set correct contact ID
           productId: "", // Can be updated if needed,
+          teamId : teamId,
           cf: { // ✅ Add custom fields (cf)
               cf_permanentaddress: null,
               cf_dateofpurchase: null,
@@ -219,10 +221,7 @@ app.post("/api/create-ticket", upload.array('files', 10), async (req, res) => {
               cf_secondaryemail: null,
               cf_severitypercentage: "0.0",
               cf_modelname: "F3 2017",
-              cf_ticket_creator : ticketCreator,
-              cf_team_assigned : team,
-              cf_project_name : projectName,
-              cf_project_code : projectCode
+              cf_project_code : projectCode,
           },
       };
 
